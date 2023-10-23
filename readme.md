@@ -1,3 +1,3 @@
 # readme
 
-Golang Clean Archtecture Studies
+Golang Clean Architecture Studies
