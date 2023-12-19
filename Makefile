@@ -4,19 +4,24 @@ ifneq (,$(wildcard ./.env))
 	ENV_FILE_PARAM = --env-file .env
 endif
 
-clear:
-	@clear
+reset:
+	@reset
 
-air:
+air: reset
 	@command -v air &>/dev/null || go install github.com/cosmtrek/air@latest
 	@expect_unbuffer air -build.exclude_dir=tmp -c=.air.toml -d
 
-app_test: clear
-	@echo -n "\n"
-	@curl -sS http://localhost:${PORT}/users | jq '.'
-	@echo -n "\n\n"
-	@curl -sS http://localhost:${PORT}/tasks | jq '.'
+app_test: reset
+	@echo -n "\nstates: "
+	@curl -sS http://localhost:${PORT}/states | jq '.[] | "\( .id ) - \( .label )"'
+	@echo -n "\nusers: "
+	@curl -sS http://localhost:${PORT}/users | jq '.[] | "\( .id ) - \( .name )"'
+	@echo -n "\n\ntasks: "
+	# @curl -sS http://localhost:${PORT}/tasks | jq '.[] | "\( .id ) - \( .id ) - \( .description )"'
+	@curl -sS http://localhost:${PORT}/tasks | jq '.[]'
 	@echo -n "\n"
 
+debug:
+	@dlv debug --listen=:2345 --headless=true --api-version=2 cmd/app/main.go
 
-.PHONY: clear lint validate watch air modd app_main app_main_test
+.PHONY: reset lint validate watch air modd app_main app_main_test

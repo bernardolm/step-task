@@ -5,8 +5,13 @@ import (
 )
 
 type appController struct {
-	taskController contracts.TaskController
-	userController contracts.UserController
+	stateController contracts.StateController
+	taskController  contracts.TaskController
+	userController  contracts.UserController
+}
+
+func (ac *appController) State() contracts.StateController {
+	return ac.stateController
 }
 
 func (ac *appController) Task() contracts.TaskController {
@@ -17,11 +22,12 @@ func (ac *appController) User() contracts.UserController {
 	return ac.userController
 }
 
-func NewAppController(uc contracts.UserController,
-	tc contracts.TaskController,
+func NewAppController(sc contracts.StateController,
+	tc contracts.TaskController, uc contracts.UserController,
 ) contracts.AppController {
 	return &appController{
-		taskController: tc,
-		userController: uc,
+		stateController: sc,
+		taskController:  tc,
+		userController:  uc,
 	}
 }

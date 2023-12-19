@@ -15,6 +15,8 @@ type userController struct {
 }
 
 func (uc *userController) GetUsers(w http.ResponseWriter, r *http.Request, _ httprouter.Params) error {
+	w.WriteHeader(http.StatusOK)
+
 	users, err := uc.userUsecase.FindAll(r.Context())
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
@@ -25,8 +27,6 @@ func (uc *userController) GetUsers(w http.ResponseWriter, r *http.Request, _ htt
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		return err
 	}
-
-	w.WriteHeader(http.StatusOK)
 
 	return nil
 }

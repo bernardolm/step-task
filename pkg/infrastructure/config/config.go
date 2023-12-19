@@ -4,7 +4,7 @@ import (
 	"context"
 	"os"
 
-	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
 
@@ -19,9 +19,9 @@ func Init(_ context.Context) error {
 		switch err.(type) {
 		case viper.ConfigFileNotFoundError, *os.PathError:
 			// NOTE: Need to log out to console regardless of log level
-			logrus.Info("using config from env vars instead config file")
+			log.Info("config file not found, using config values from env vars")
 		default:
-			logrus.WithError(err).Error("failed to load config using viper")
+			log.WithError(err).Error("failed to load config file")
 		}
 	}
 

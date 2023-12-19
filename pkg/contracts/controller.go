@@ -7,8 +7,14 @@ import (
 )
 
 type AppController interface {
+	State() StateController
 	Task() TaskController
 	User() UserController
+}
+
+type StateController interface {
+	CreateState(http.ResponseWriter, *http.Request, httprouter.Params) error
+	GetStates(http.ResponseWriter, *http.Request, httprouter.Params) error
 }
 
 type TaskController interface {

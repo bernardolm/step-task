@@ -2,24 +2,21 @@
 
 ```mermaid
 flowchart RL;
-    %%Infrastructure-->Registry
-    %%DataBaseInfra--GetState-->TaskRepository
-    %%DataStoreInfra-->UserRepository
-    %%FilerInfra--GetManifest-->TaskRepository
+    DataBaseInfra--GetState-->TaskRepository
+    DataStoreInfra-->UserRepository
+    Domain-->UseCase
+    FilerInfra--GetManifest-->TaskRepository
     FilesAndFolders[Files and Folders]-->FilerInfra
+    Infrastructure-->Repository
     Main-->Router
     Mock-->DataStoreInfra
-    Router-->Registry
-    Registry--NewAppController-->Controller
-    SQLite-->DataBaseInfra
-    %%TaskRepository-->TaskController
     Repository-->Controller
-    %%TaskUseCase-->TaskController
-    %%UserRepository--NewTaskUsecase-->UserController
-    %%UserUseCase--NewUserUsecase-->UserController
+    SQLite-->DataBaseInfra
+    TaskRepository-->TaskController
+    TaskUseCase-->TaskController
     UseCase-->Controller
-    Domain-->UseCase
-    Infrastructure-->Repository
+    UserRepository--NewTaskUsecase-->UserController
+    UserUseCase--NewUserUsecase-->UserController
 
     subgraph Controller
     UserController

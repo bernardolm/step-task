@@ -12,13 +12,13 @@ import (
 func NewRouter(c contracts.AppController) http.Handler {
 	r := httprouter.New()
 
-	r.GET("/users", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-		if err := c.User().GetUsers(w, r, p); err != nil {
+	r.GET("/states", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+		if err := c.State().GetStates(w, r, p); err != nil {
 			log.Fatal(err)
 		}
 	})
-	r.POST("/users", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-		if err := c.User().CreateUser(w, r, p); err != nil {
+	r.POST("/states", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+		if err := c.State().CreateState(w, r, p); err != nil {
 			log.Fatal(err)
 		}
 	})
@@ -34,8 +34,16 @@ func NewRouter(c contracts.AppController) http.Handler {
 		}
 	})
 
-	// al := accesslog.Handler(r)
-	// return al
+	r.GET("/users", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+		if err := c.User().GetUsers(w, r, p); err != nil {
+			log.Fatal(err)
+		}
+	})
+	r.POST("/users", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+		if err := c.User().CreateUser(w, r, p); err != nil {
+			log.Fatal(err)
+		}
+	})
 
 	return r
 }

@@ -17,6 +17,8 @@ type taskController struct {
 func (tc *taskController) GetTasks(
 	w http.ResponseWriter, r *http.Request, _ httprouter.Params,
 ) error {
+	w.WriteHeader(http.StatusOK)
+
 	tasks, err := tc.taskUsecase.FindAll(r.Context())
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
@@ -27,8 +29,6 @@ func (tc *taskController) GetTasks(
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		return err
 	}
-
-	w.WriteHeader(http.StatusOK)
 
 	return nil
 }

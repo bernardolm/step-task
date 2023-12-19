@@ -5,12 +5,12 @@ import (
 )
 
 type DatabaseInfrastructure interface {
-	Create(interface{}) error
-	Delete(interface{}) error
-	Find(interface{}) error
-	Migrate(...interface{}) error
-	Read(uint, interface{}) error
-	Update(interface{}) error
+	Create(context.Context, interface{}) error
+	Delete(context.Context, interface{}) error
+	Find(context.Context, interface{}) error
+	Migrate(context.Context, ...interface{}) error
+	Read(context.Context, uint, interface{}) error
+	Update(context.Context, interface{}) error
 }
 
 type FilerInfrastructure interface {

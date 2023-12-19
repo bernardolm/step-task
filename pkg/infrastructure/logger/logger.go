@@ -4,17 +4,18 @@ import (
 	"context"
 	"os"
 
-	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 )
 
 func Init(_ context.Context) {
-	// Log as JSON instead of the default ASCII formatter.
-	// logrus.SetFormatter(&logrus.JSONFormatter{})
+	log.SetLevel(log.InfoLevel)
 
-	// Output to stdout instead of the default stderr
-	// Can be any io.Writer, see below for File example
-	logrus.SetOutput(os.Stdout)
+	if level, err := log.ParseLevel(viper.GetString("LOG_LEVEL")); err != nil {
+		log.Error(err)
+	} else {
+		log.SetLevel(level)
+	}
 
-	// Only log the warning severity or above.
-	logrus.SetLevel(logrus.DebugLevel)
+	log.SetOutput(os.Stdout)
 }
