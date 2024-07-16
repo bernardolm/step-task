@@ -3,7 +3,7 @@
 ## References
 
 - <https://hackernoon.com/golang-clean-archithecture-efd6d7c43047>
-- <https://github.com/bxcodec/go-clean-arch>.
+- <https://github.com/bxcodec/go-clean-arch>
 - <https://manakuro.medium.com/clean-architecture-with-go-bce409427d31>
 - <https://github.com/manakuro/golang-clean-architecture>
 
