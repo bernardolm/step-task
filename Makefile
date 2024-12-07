@@ -27,7 +27,7 @@ format-all:
 	@FILES=all make format
 
 run: format
-	@go run cmd/cli/main.go doareOrganizationTransactionImport
+	@go run cmd/cli/main.go
 
 build: export LDFLAGS_X="-X ${APP_ROOT_NAMESPACE}/config.BuildAt=${NOW} \
 -X ${APP_ROOT_NAMESPACE}/config.CommitHash=${COMMIT_HASH} \
@@ -35,4 +35,4 @@ build: export LDFLAGS_X="-X ${APP_ROOT_NAMESPACE}/config.BuildAt=${NOW} \
 build: format
 	@eval go build -ldflags \"-w -s ${LDFLAGS_X}\" -o bin/step-task cmd/cli/main.go
 
-.PHONY: config air debug format run ldflags build install
+.PHONY: config air debug format format-all run ldflags build
