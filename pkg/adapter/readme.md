@@ -1,3 +1,8 @@
-# For what?
+# Adaptaers
 
-Controllers, Presenters, Gateways...
+- Assemblers (parsers)
+- Controllers
+- Data Transfer Objects (DTOs)
+- Gateways
+- Presenters
+- Repositories
