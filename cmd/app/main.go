@@ -20,41 +20,45 @@ import (
 	"github.com/bernardolm/step-task/pkg/usecase"
 )
 
-var (
-	// TODO: get from env var
-	dbLocation = "db/sqlite.db"
-	start      = time.Now()
-)
+var start = time.Now()
 
 func main() {
+	log.Info("starting app")
+
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
 
-	logger.Init(ctx)
-
-	if err := config.Init(ctx); err != nil {
+	if err := config.Load(); err != nil {
 		log.Error(err)
 	}
 
-	db, err := sqlite.New(ctx, dbLocation)
+	logger.Init(ctx)
+
+	databasePath := viper.GetString("DATABASE_PATH")
+
+	db, err := sqlite.New(ctx, databasePath)
 	if err != nil {
 		log.Panic(err)
 	}
 
-	ur := repository.NewUserRepository(db)
-	tr := repository.NewTaskRepository(db)
+	// keep order!
+	sr := repository.NewStateRepository(ctx, db)
+	ur := repository.NewUserRepository(ctx, db)
+	tr := repository.NewTaskRepository(ctx, db)
 
-	if err := repository.Seed(ur, tr); err != nil {
-		log.Panic(err)
+	if err := repository.Seed(ctx, sr, tr, ur); err != nil {
+		log.WithError(err).Panic("repository seed failed")
 	}
 
+	suc := usecase.NewStateUsecase(sr)
 	uuc := usecase.NewUserUsecase(ur)
 	tuc := usecase.NewTaskUsecase(tr)
 
+	sc := controller.NewStateController(suc)
 	uc := controller.NewUserController(uuc)
 	tc := controller.NewTaskController(tuc)
 
-	app := controller.NewAppController(uc, tc)
+	app := controller.NewAppController(sc, tc, uc)
 
 	r := router.NewRouter(app)
 
@@ -73,5 +77,5 @@ func main() {
 
 	<-ctx.Done()
 
-	log.Info("terminating")
+	log.Info("terminating app")
 }

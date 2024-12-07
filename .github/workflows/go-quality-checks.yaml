@@ -1,0 +1,82 @@
+name: Code Quality Pipeline
+
+on:
+  pull_request:
+
+permissions:
+  contents: read  # needed for golangci-lint detect new issues from master
+
+env:
+  GONOSUMDB: github.com/bernardolm/*
+
+jobs:
+  test:
+    name: Build and Test Job
+    runs-on: [ self-hosted ]
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Setup Go Environment
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.20'
+          check-latest: true
+          cache-dependency-path: go.sum
+
+      - name: Download Dependencies
+        run: go mod download
+
+      - name: Build Consumer Application
+        run: go build -ldflags "-w -s" ./cmd/consumer/main.go
+
+      - name: Build Console Application
+        run: go build -ldflags "-w -s" ./cmd/console/main.go
+
+      - name: Run Tests
+        run: go test -failfast -shuffle=on -race -vet=all -timeout=1m ./...
+
+  govulncheck:
+    name: Vulnerability Check Job
+    needs: test
+    runs-on: [ self-hosted ]
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Setup Go Environment
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.20'
+          check-latest: true
+          cache-dependency-path: go.sum
+
+      - name: Install Govulncheck
+        run: go install golang.org/x/vuln/cmd/govulncheck@latest
+        shell: bash
+
+      - name: Run Govulncheck
+        run: govulncheck ./...
+        shell: bash
+
+  lint:
+    name: Lint Job
+    needs: govulncheck
+    runs-on: [ self-hosted ]
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Setup Go Environment
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.20'
+          check-latest: true
+          cache: false
+
+      - name: Run Golangci-lint
+        uses: golangci/golangci-lint-action@v3
+        with:
+          args: --timeout=20m --concurrency=1 --allow-parallel-runners=false --allow-serial-runners=false
+          version: latest
+          only-new-issues: true

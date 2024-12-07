@@ -7,19 +7,19 @@ import (
 	"github.com/bernardolm/step-task/pkg/domain/model"
 )
 
-type userRepository struct {
+type stateRepository struct {
 	db contract.DatabaseInfrastructure
 }
 
-func (r *userRepository) Create(ctx context.Context, m *model.User) error {
+func (r *stateRepository) Create(ctx context.Context, m *model.State) error {
 	if err := r.db.Create(ctx, m); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (r *userRepository) FindAll(ctx context.Context) ([]model.User, error) {
-	result := []model.User{}
+func (r *stateRepository) FindAll(ctx context.Context) ([]model.State, error) {
+	result := []model.State{}
 
 	if err := r.db.Find(ctx, &result); err != nil {
 		return nil, err
@@ -28,12 +28,12 @@ func (r *userRepository) FindAll(ctx context.Context) ([]model.User, error) {
 	return result, nil
 }
 
-func NewUserRepository(ctx context.Context,
+func NewStateRepository(ctx context.Context,
 	db contract.DatabaseInfrastructure,
-) contract.UserRepository {
-	db.Migrate(ctx, &model.User{})
+) contract.StateRepository {
+	db.Migrate(ctx, &model.State{})
 
-	return &userRepository{
+	return &stateRepository{
 		db: db,
 	}
 }

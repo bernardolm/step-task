@@ -4,19 +4,20 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/julienschmidt/httprouter"
-
-	"github.com/bernardolm/step-task/pkg/contracts"
+	"github.com/bernardolm/step-task/pkg/contract"
 	"github.com/bernardolm/step-task/pkg/domain/model"
+	"github.com/julienschmidt/httprouter"
 )
 
 type taskController struct {
-	taskUsecase contracts.TaskUseCase
+	taskUsecase contract.TaskUseCase
 }
 
 func (tc *taskController) GetTasks(
 	w http.ResponseWriter, r *http.Request, _ httprouter.Params,
 ) error {
+	w.WriteHeader(http.StatusOK)
+
 	tasks, err := tc.taskUsecase.FindAll(r.Context())
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
@@ -27,8 +28,6 @@ func (tc *taskController) GetTasks(
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		return err
 	}
-
-	w.WriteHeader(http.StatusOK)
 
 	return nil
 }
@@ -53,6 +52,6 @@ func (tc *taskController) CreateTask(
 	return nil
 }
 
-func NewTaskController(tuc contracts.TaskUseCase) contracts.TaskController {
+func NewTaskController(tuc contract.TaskUseCase) contract.TaskController {
 	return &taskController{tuc}
 }

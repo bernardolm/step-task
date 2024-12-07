@@ -1,0 +1,29 @@
+[build]
+  cmd = "echo 'build.cmd' ; go build -o bin/air_bin cmd/cli/main.go"
+  exclude_dir = [
+    ".git",
+    ".githooks",
+    ".github",
+    "database",
+    "tmp",
+    "vendor"
+  ]
+  exclude_regex = [
+    "_test.go",
+    "*.md"
+  ]
+  full_bin = "echo 'build.full_bin' ; bin/air_bin"
+  include_ext = [
+    "go",
+    "toml",
+    "yaml",
+    "yml",
+    "env"
+  ]
+  include_file = ["Makefile"]
+  post_cmd = ["echo 'build.post_cmd'"]
+  pre_cmd = [
+    "reset; echo 'build.pre_cmd'",
+    "[ ! -f bin/air_bin ] || rm -f bin/air_bin",
+    "bash -c .githooks/pre-commit",
+  ]

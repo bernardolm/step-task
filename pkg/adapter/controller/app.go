@@ -1,27 +1,31 @@
 package controller
 
-import (
-	"github.com/bernardolm/step-task/pkg/contracts"
-)
+import "github.com/bernardolm/step-task/pkg/contract"
 
 type appController struct {
-	taskController contracts.TaskController
-	userController contracts.UserController
+	stateController contract.StateController
+	taskController  contract.TaskController
+	userController  contract.UserController
 }
 
-func (ac *appController) Task() contracts.TaskController {
+func (ac *appController) State() contract.StateController {
+	return ac.stateController
+}
+
+func (ac *appController) Task() contract.TaskController {
 	return ac.taskController
 }
 
-func (ac *appController) User() contracts.UserController {
+func (ac *appController) User() contract.UserController {
 	return ac.userController
 }
 
-func NewAppController(uc contracts.UserController,
-	tc contracts.TaskController,
-) contracts.AppController {
+func NewAppController(sc contract.StateController,
+	tc contract.TaskController, uc contract.UserController,
+) contract.AppController {
 	return &appController{
-		taskController: tc,
-		userController: uc,
+		stateController: sc,
+		taskController:  tc,
+		userController:  uc,
 	}
 }

@@ -1,29 +1,72 @@
 package config
 
 import (
-	"context"
 	"os"
+	"time"
 
-	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
 
-func Init(_ context.Context) error {
-	viper.AutomaticEnv()
+var (
+	BuildAt    string
+	CommitHash string
+	IsDirty    string
+
+	AppName = "MarketingService"
+
+	timeout    = 60 * time.Second
+	timeToLive = 7 * 24 * time.Hour
+)
+
+func Load() error {
+	setAppName()
+
+	viper.SetDefault("DEBUG", false)
+	viper.SetDefault("LOG_LEVEL", "info")
+
+	viper.SetDefault("HTTP_TIMEOUT", timeout)
+
+	viper.SetDefault("POSTGRES_DATABASE", "marketing")
+	viper.SetDefault("POSTGRES_DEBUG", false)
+	viper.SetDefault("POSTGRES_HOST", "localhost")
+	viper.SetDefault("POSTGRES_PORT", 5432)
+
+	viper.SetDefault("REDIS_HOST", "localhost")
+	viper.SetDefault("REDIS_PORT", 6379)
+	viper.SetDefault("REDIS_TIMEOUT", timeout)
+	viper.SetDefault("REDIS_TTL", timeToLive)
 
 	viper.AddConfigPath(".")
+	viper.AddConfigPath("../../")
 	viper.SetConfigFile(".env")
-	viper.SetConfigType("env")
 
 	if err := viper.ReadInConfig(); err != nil {
 		switch err.(type) {
 		case viper.ConfigFileNotFoundError, *os.PathError:
-			// NOTE: Need to log out to console regardless of log level
-			logrus.Info("using config from env vars instead config file")
+			log.WithError(err).
+				Warn("using config from env vars instead config file")
 		default:
-			logrus.WithError(err).Error("failed to load config using viper")
+			return err
 		}
 	}
 
 	return nil
+}
+
+func setAppName() {
+	if BuildAt == "" {
+		// format: YYMMDD-HHmmss
+		BuildAt = time.Now().Local().Format("060102-150405")
+	}
+
+	AppName += "_" + BuildAt
+
+	if CommitHash != "" {
+		AppName += "_" + CommitHash
+
+		if IsDirty == "yes" {
+			AppName += "-dirty"
+		}
+	}
 }

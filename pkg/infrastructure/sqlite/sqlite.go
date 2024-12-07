@@ -2,8 +2,9 @@ package sqlite
 
 import (
 	"context"
+	"time"
 
-	"github.com/k0kubun/pp"
+	"github.com/spf13/viper"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -16,59 +17,78 @@ type database struct {
 func (d *database) open(ctx context.Context, databasePath string) error {
 	dial := sqlite.Open(databasePath)
 
-	gdb, err := gorm.Open(dial, &gorm.Config{})
+	lcfg := logger.Default
+	lcfg.LogMode(logger.Info)
+
+	cfg := gorm.Config{
+		// AllowGlobalUpdate: true,
+		Logger: lcfg,
+		// NamingStrategy: schema.NamingStrategy{
+		// 	SingularTable: true,
+		// },
+		// PrepareStmt: true,
+		// QueryFields: true,
+	}
+
+	gormDB, err := gorm.Open(dial, &cfg)
 	if err != nil {
 		return err
 	}
 
-	pp.Print(gdb.Error)
+	if gormDB.Error != nil {
+		return err
+	}
 
-	d.db = gdb.Session(&gorm.Session{
-		AllowGlobalUpdate:    true,
-		FullSaveAssociations: true,
-		Initialized:          true,
-		Logger:               gdb.Logger.LogMode(logger.Info),
-		QueryFields:          true,
-	}).WithContext(ctx)
+	d.db = gormDB.WithContext(ctx).Session(&gorm.Session{
+		// FullSaveAssociations: true,
+		Logger: lcfg,
+		NewDB:  true,
+		NowFunc: func() time.Time {
+			return time.Now().UTC()
+		},
+	})
+
+	if viper.GetBool("DEBUG") {
+		d.db = d.db.Debug()
+	}
 
 	return nil
 }
 
-func (d *database) Create(v interface{}) error {
-	if result := d.db.Create(v); result.Error != nil {
+func (d *database) Create(ctx context.Context, dst interface{}) error {
+	if result := d.db.WithContext(ctx).Create(dst); result.Error != nil {
 		return result.Error
 	}
 	return nil
 }
 
-func (d *database) Delete(v interface{}) error {
-	if result := d.db.Unscoped().Delete(v, "1=1"); result.Error != nil {
+func (d *database) Delete(ctx context.Context, dst interface{}) error {
+	if result := d.db.WithContext(ctx).Unscoped().Delete(dst, "1=1"); result.Error != nil {
 		return result.Error
 	}
 	return nil
 }
 
-func (d *database) Find(dst interface{}) error {
-	if result := d.db.Find(dst); result.Error != nil {
+func (d *database) Find(ctx context.Context, dst interface{}) error {
+	if result := d.db.WithContext(ctx).Find(dst); result.Error != nil {
 		return result.Error
 	}
 	return nil
 }
 
-func (d *database) Migrate(dst ...interface{}) error {
-	d.db.Migrator().DropTable(dst...)
-	return d.db.AutoMigrate(dst...)
+func (d *database) Migrate(ctx context.Context, dst ...interface{}) error {
+	return d.db.WithContext(ctx).AutoMigrate(dst...)
 }
 
-func (d *database) Read(id uint, dst interface{}) error {
-	if result := d.db.First(dst, id); result.Error != nil {
+func (d *database) Read(ctx context.Context, id uint, dst interface{}) error {
+	if result := d.db.WithContext(ctx).First(dst, id); result.Error != nil {
 		return result.Error
 	}
 	return nil
 }
 
-func (d *database) Update(v interface{}) error {
-	if result := d.db.Updates(v); result.Error != nil {
+func (d *database) Update(ctx context.Context, dst interface{}) error {
+	if result := d.db.WithContext(ctx).Updates(dst); result.Error != nil {
 		return result.Error
 	}
 	return nil
@@ -80,6 +100,9 @@ func New(ctx context.Context, databasePath string) (*database, error) {
 	if err := d.open(ctx, databasePath); err != nil {
 		return nil, err
 	}
+
+	// Remove!!!
+	// d.db.WithContext(ctx).Migrator().DropTable(model.Task{}, model.User{}, model.State{})
 
 	return &d, nil
 }

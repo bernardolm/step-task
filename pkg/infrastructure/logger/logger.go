@@ -3,18 +3,36 @@ package logger
 import (
 	"context"
 	"os"
+	"path"
+	"runtime"
+	"strconv"
+	"strings"
 
-	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 )
 
-func Init(_ context.Context) {
-	// Log as JSON instead of the default ASCII formatter.
-	// logrus.SetFormatter(&logrus.JSONFormatter{})
+func Init(ctx context.Context) {
+	ll := log.InfoLevel
 
-	// Output to stdout instead of the default stderr
-	// Can be any io.Writer, see below for File example
-	logrus.SetOutput(os.Stdout)
+	llEnv := viper.GetString("LOG_LEVEL")
+	llNew, err := log.ParseLevel(llEnv)
+	if err == nil {
+		ll = llNew
+	}
 
-	// Only log the warning severity or above.
-	logrus.SetLevel(logrus.DebugLevel)
+	log.SetLevel(ll)
+
+	if viper.GetBool("DEBUG") {
+		log.SetReportCaller(true)
+		log.SetFormatter(&log.TextFormatter{
+			CallerPrettyfier: func(frame *runtime.Frame) (function, file string) {
+				fn := strings.ReplaceAll(frame.Function, "github.com/bernardolm/step-task/", "")
+				fileName := path.Base(frame.File) + ":" + strconv.Itoa(frame.Line)
+				return fn, fileName
+			},
+		})
+	}
+
+	log.SetOutput(os.Stdout)
 }

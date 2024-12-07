@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+echo "> starting pre-commit"
+
+go mod tidy
+
+if [ "${FILES}" = "all" ]; then
+  modified_go_files=$(find . -name '*.go' | sort | tr '\n' ' ')
+else
+  modified_go_files=$(git diff --name-only --diff-filter=ACMRTUXB | grep '\.go$' | sort | tr '\n' ' ')
+fi
+
+if [ ! -z "${modified_go_files}" ]; then
+  echo -e "> working on these files\n${modified_go_files// /\n}"
+
+  echo "> gofumpt"
+  command -v gofumpt &>/dev/null || go install mvdan.cc/gofumpt@latest
+  eval "gofumpt -e -l -w -extra ${modified_go_files}"
+
+  echo "> goimports"
+  command -v goimports &>/dev/null || go install golang.org/x/tools/cmd/goimports@latest
+  eval "goimports -e -l -w ${modified_go_files}"
+
+  echo "> gci"
+  command -v gci &>/dev/null || go install github.com/daixiang0/gci@latest
+  eval "gci write ${modified_go_files} --custom-order --section standard " \
+    " --section default --section localmodule --skip-generated --skip-vendor"
+
+  echo "> gofmt"
+  eval "gofmt -w -s -r 'interface{} -> any' ${modified_go_files}"
+
+  if [ "${GOLINES}" = "yes" ]; then
+    echo "> golines"
+    command -v golines &>/dev/null || go install github.com/segmentio/golines@latest
+    eval "golines --chain-split-dots --ignore-generated --max-len=120 --reformat-tags " \
+      "--shorten-comments --write-output ${modified_go_files}"
+  fi
+fi
+
+echo "> pre-commit done"

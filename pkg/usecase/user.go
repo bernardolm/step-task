@@ -3,12 +3,12 @@ package usecase
 import (
 	"context"
 
-	"github.com/bernardolm/step-task/pkg/contracts"
+	"github.com/bernardolm/step-task/pkg/contract"
 	"github.com/bernardolm/step-task/pkg/domain/model"
 )
 
 type userUsecase struct {
-	userRepository contracts.UserRepository
+	userRepository contract.UserRepository
 }
 
 func (uu *userUsecase) Create(ctx context.Context, u *model.User) error {
@@ -19,7 +19,7 @@ func (uu *userUsecase) FindAll(ctx context.Context) ([]model.User, error) {
 	return uu.userRepository.FindAll(ctx)
 }
 
-func NewUserUsecase(r contracts.UserRepository) contracts.UserUseCase {
+func NewUserUsecase(r contract.UserRepository) contract.UserUseCase {
 	return &userUsecase{
 		userRepository: r,
 	}

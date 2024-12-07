@@ -3,12 +3,12 @@ package usecase
 import (
 	"context"
 
-	"github.com/bernardolm/step-task/pkg/contracts"
+	"github.com/bernardolm/step-task/pkg/contract"
 	"github.com/bernardolm/step-task/pkg/domain/model"
 )
 
 type taskUsecase struct {
-	taskRepository contracts.TaskRepository
+	taskRepository contract.TaskRepository
 }
 
 func (uu *taskUsecase) Create(ctx context.Context, u *model.Task) error {
@@ -23,7 +23,7 @@ func (uu *taskUsecase) GetState(ctx context.Context, id uint) (*string, error) {
 	return uu.taskRepository.GetState(ctx, id)
 }
 
-func NewTaskUsecase(r contracts.TaskRepository) contracts.TaskUseCase {
+func NewTaskUsecase(r contract.TaskRepository) contract.TaskUseCase {
 	return &taskUsecase{
 		taskRepository: r,
 	}

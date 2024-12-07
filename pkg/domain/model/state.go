@@ -6,12 +6,12 @@ import (
 	"gorm.io/gorm"
 )
 
-type User struct {
+type State struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt `gorm:"index"`
 
 	ID int64 `gorm:"primarykey,autoIncrement,column:id" json:"id"`
 
-	Name string `json:"name"`
+	Label string `gorm:"unique_index" json:"label"`
 }
